@@ -1,0 +1,4 @@
+.*.sw*
+
+cmd/babysitter/babysitter
+babysitter
