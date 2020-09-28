@@ -9,6 +9,8 @@ import (
 
 	"github.com/elico/icap"
 	"github.com/rs/zerolog/log"
+
+	"github.com/jcline/babysitter/internal/rule"
 )
 
 var istag uint64
@@ -54,11 +56,17 @@ func icapHandler(response icap.ResponseWriter, request *icap.Request) {
 	case "REQMOD":
 		headers.Set("Cache-Control", "no-cache")
 
-		request.Request.Header.Add("Permitted", "no")
+		if !rule.RuleManager.Allow(request.Request) {
+			request.Request.Header.Add("Permitted", "no")
+			status = http.StatusOK
+			response.WriteHeader(status, request.Request, false)
+		} else {
+			// if it's allowed we just return a 204 and squid
+			// proceeds
+			status = http.StatusNoContent
+			response.WriteHeader(status, nil, false)
+		}
 
-		status = http.StatusOK
-		response.WriteHeader(status, request.Request, false)
-		//status = http.StatusNoContent
 	default:
 		// wat, we only support OPTIONS and REQMOD
 		response.WriteHeader(http.StatusMethodNotAllowed, nil, false)

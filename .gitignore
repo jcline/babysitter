@@ -2,3 +2,5 @@
 
 cmd/babysitter/babysitter
 babysitter
+cmd/babysitter/sit
+sit
